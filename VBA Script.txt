@@ -1,0 +1,113 @@
+Sub stocks()
+
+Dim ws As Worksheet
+Dim last_row As Double
+Dim sum_table_row As Long
+Dim ticker As String
+Dim counter As Integer
+Dim total As Double
+Dim pct_chg As Double
+Dim yearly_chg As Double
+Dim year_close As Double
+Dim year_open As Double
+Dim previous_amount As Long
+Dim greatest_increase As Double
+Dim greatest_decrease As Double
+Dim greatest_total_volume As Double
+
+
+For Each ws In Worksheets
+
+    ws.Range("I1").Value = "Ticker"
+    ws.Range("J1").Value = "Yearly Change"
+    ws.Range("K1").Value = "Percent Change"
+    ws.Range("L1").Value = "Total Stock Volume"
+    ws.Range("O2").Value = "Greatest % increase"
+    ws.Range("O3").Value = "Greatest % Decrease"
+    ws.Range("O4").Value = "Greatest Total Volume"
+    ws.Range("P1").Value = "Ticker"
+    ws.Range("Q1").Value = "Value"
+    
+    last_row = ws.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    counter = 2
+    total = 0
+    sum_table_row = 2
+    previous_amount = 2
+    greatest_increase = 0
+    greatest_decrease = 0
+    greatest_total_volume = 0
+    
+    
+        For i = 2 To last_row
+
+            total = total + ws.Cells(i, 7).Value
+            ' check if same ticker
+            If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+
+                ' set name
+                ticker = ws.Cells(i, 1).Value
+                ' print name in the table
+                ws.Range("I" & sum_table_row).Value = ticker
+                ' print total in the table
+                ws.Range("L" & sum_table_row).Value = total
+                ' reset total
+                total = 0
+
+                ' set open, close, and change
+                year_open = ws.Range("C" & previous_amount)
+                year_close = ws.Range("F" & i)
+                yearly_chg = year_close - year_open
+                ws.Range("J" & sum_table_row).Value = yearly_chg
+
+                ' determine change %
+                If year_open = 0 Then
+                    pct_chg = 0
+                Else
+                    year_open = ws.Range("C" & previous_amount)
+                    pct_chg = yearly_chg / year_open
+                End If
+                ' formatting
+                ws.Range("K" & sum_table_row).NumberFormat = "0.00%"
+                ws.Range("K" & sum_table_row).Value = pct_chg
+
+                ' formatting
+                If ws.Range("J" & sum_table_row).Value >= 0 Then
+                    ws.Range("J" & sum_table_row).Interior.ColorIndex = 4
+                Else
+                    ws.Range("J" & sum_table_row).Interior.ColorIndex = 3
+                End If
+            
+                sum_table_row = sum_table_row + 1
+                previous_amount = i + 1
+                End If
+            Next i
+
+            ' greatest increase decrease and total
+            last_row = ws.Cells(Rows.Count, 11).End(xlUp).Row
+        
+            ' for loop
+            For i = 2 To last_row
+                If ws.Range("K" & i).Value > ws.Range("Q2").Value Then
+                    ws.Range("Q2").Value = ws.Range("K" & i).Value
+                    ws.Range("P2").Value = ws.Range("I" & i).Value
+                End If
+
+                If ws.Range("K" & i).Value < ws.Range("Q3").Value Then
+                    ws.Range("Q3").Value = ws.Range("K" & i).Value
+                    ws.Range("P3").Value = ws.Range("I" & i).Value
+                End If
+
+                If ws.Range("L" & i).Value > ws.Range("Q4").Value Then
+                    ws.Range("Q4").Value = ws.Range("L" & i).Value
+                    ws.Range("P4").Value = ws.Range("I" & i).Value
+                End If
+
+            Next i
+        ' format
+            ws.Range("Q2").NumberFormat = "0.00%"
+            ws.Range("Q3").NumberFormat = "0.00%"
+
+    Next ws
+
+End Sub
